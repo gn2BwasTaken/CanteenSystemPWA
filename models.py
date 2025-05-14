@@ -1,16 +1,12 @@
-import sqlite3 as sql
+from flask_sqlalchemy import SQLAlchemy
 
-def insertUser(username, password):
-    con = sql.connect("database.db")
-    cur = con.cursor()
-    cur.execute("INSERT INTO users (username,password) VALUES (?,?)", (username,password))
-    con.commit()
-    con.close()
+db = SQLAlchemy()
 
-def retrieveUsers():
-	con = sql.connect("database.db")
-	cur = con.cursor()
-	cur.execute("SELECT username, password FROM users")
-	users = cur.fetchall()
-	con.close()
-	return users
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password = db.Column(db.String(120), nullable=False)
+    dateOfBirth = db.Column(db.String(40), unique=False, nullable=False)
+
+    def __repr__(self):
+        return f'<User {self.username}>'
