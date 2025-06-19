@@ -4,10 +4,9 @@ const assets = [
     "static/js/app.js",
     "static/images/logo.png",
     "static/images/favicon.jpg",
-    "static/icons/icon-128x128.png",
-    "static/icons/icon-192x192.png",
-    "static/icons/icon-384x384.png",
-    "static/icons/icon-512x512.png"
+    "static/icons/icon-640x640.png",
+    "static/icons/icon-1280x1280.png",
+    "static/icons/icon-2048x2048.png"
   ];
 
 const CATALOGUE_ASSETS = "catalogue-assets";

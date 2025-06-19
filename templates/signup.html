@@ -1,5 +1,6 @@
 {% extends 'layout.html' %} {% block content %}
 <h1>Signup Form</h1>
+<div class="SignUpDiv">
 <form action="/signup.html" method="POST" class="box">
   <div class="input__wrapper">
     <input
@@ -18,6 +19,18 @@
       placeholder="Password"
       class="input__field"
     />
+  </div>
+  <div class="input__wrapper">
+    <select
+      id="TypeOfAccount"
+      name="typeOfAccount"
+      list
+      class="input__field"
+    />
+     <option value="Customer">Customer</option>
+     <option value="Employee">Employee</option>
+     <option value="Supplier">Supplier</option>
+  </select>
   </div>
   <div class="input__wrapper">
     <input
@@ -47,6 +60,7 @@
     <button id="submitButton" type="submit" class="btn">Submit</button>
   </div>
 </form>
+</div>
 <script>
   const specialChars = ["@", "#", "(", ")", "$"];
   const commonPasswords = ["password", "01234567890", "qwertyuiop"];

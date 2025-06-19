@@ -71,7 +71,8 @@ def signup():
         username = request.form["username"]
         password = generate_password_hash(request.form['password'])
         dateOfBirth = request.form["dob"]
-        new_user = User(username=username, password=password, dateOfBirth=dateOfBirth)
+        typeOfAccount = request.form["typeOfAccount"]
+        new_user = User(username=username, password=password, dateOfBirth=dateOfBirth, customerType=typeOfAccount)
         db.session.add(new_user)
         db.session.commit()
         return redirect(url_for('home'))

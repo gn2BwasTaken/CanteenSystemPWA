@@ -151,6 +151,9 @@ label,
   text-align: justify;
   text-justify: inter-word;
 }
+.SignUpDiv {
+  width: 50%;
+}
 
 .validation-warning {
   display: block;
@@ -204,4 +207,39 @@ label,
   margin-right: 5px;
   border-radius: 100%;
   transition: 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+#IconImage {
+  filter: invert(0%);
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #1c1c1c;
+  }
+  h1, h2, h3, p {
+    color: white;
+  }
+  nav h1 {
+    color: white;
+  }
+  em {
+    color: white;
+  }
+  #IconImage {
+  filter: invert(100%);
+}
+  nav ul li a {
+    color: white;
+  }
+  .input__field {
+    color: white;
+    background-color: #3a3a3a;
+  }
+  .validation-warning {
+    background-color: #3a3a3a;
+  }
+  .validation-warning p {
+    background-color: #6f6f6f;
+  }
 }
