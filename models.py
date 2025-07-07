@@ -20,3 +20,13 @@ class User(db.Model):
 
     def __repr__(self):
         return f'<User {self.username}>'
+
+class FoodItem(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), unique=False, nullable=False)
+    foodType = db.Column(db.String(40), unique=False, nullable=False)
+    description = db.Column(db.String(150), unique=False, nullable=False)
+    companyUnder = db.Column(db.Integer, db.ForeignKey('company.id'), nullable=True)
+
+    def __repr__(self):
+        return f'<User {self.name}>'

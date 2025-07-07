@@ -1,3 +1,5 @@
+import logging
+from logging.config import dictConfig
 from flask import Flask, session, request, redirect, url_for
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -7,6 +9,23 @@ from flask_sqlalchemy import SQLAlchemy
 from flask import render_template
 
 import user_management as dbHandler
+
+dictConfig({
+    'version': 1,
+    'formatters': {'default': {
+        'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
+    }},
+    'handlers': {'wsgi': {
+        'class': 'logging.StreamHandler',
+        'stream': 'ext://flask.logging.wsgi_errors_stream',
+        'formatter': 'default'
+    }},
+    'root': {
+        'level': 'INFO',
+        'handlers': ['wsgi']
+    }
+})
+
 
 # Code snippet for logging a message
 # app.logger.critical("message")
@@ -38,7 +57,11 @@ def bypass_login_if_in_session(f): # this bypasses the need to log in again if t
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'username' in session:
-            return redirect(url_for('systemPage'))
+            app.logger.info('in company: %s',  session['isInCompany'])
+            if session['isInCompany'] == 'No':
+                return redirect(url_for('linkCompany'))
+            else:
+                return redirect(url_for('systemPage'))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -53,10 +76,25 @@ def systemPage():
             feedback = request.form["feedback"]
             dbHandler.insertFeedback(feedback)
             dbHandler.listFeedback()
+            print('username')
             return render_template("/home.html", state=True, value="Back")
     else:
         dbHandler.listFeedback()
         return render_template("/home.html", state=True, value="Back")
+    
+@app.route("/linkCompany.html", methods=["POST", "GET"])
+@login_required
+def linkCompany():
+    if request.method == "GET" and request.args.get("url"):
+        url = request.args.get("url", "")
+        return redirect(url, code=302)
+    if request.method == "POST":
+        if 'username' in session: 
+            compNumber = request.form["compNumber"]
+            print(compNumber)
+            return render_template("/home.html", state=True, value="Back")
+    else:
+        return render_template("/linkCompany.html", state=True, value="Back")
 
 
 @app.route("/signup.html", methods=["POST", "GET", "PUT", "PATCH", "DELETE"])
@@ -94,7 +132,14 @@ def home():
             user = User.query.filter_by(username=username).first()
             if user and check_password_hash(user.password, password):
                 session['username'] = user.username
-                return render_template("/home.html", value=username, state=True)
+                session['customerType'] = user.customerType
+                app.logger.info(user.companyUnder)
+                if user.companyUnder == None:
+                    session['isInCompany'] = 'No'
+                    return redirect(url_for('linkCompany'))
+                else:
+                    session['isInCompany'] = 'Yes'
+                    return render_template("/home.html", value=username, state=True)
             else:
                 return redirect(url_for('home'))
         except:
@@ -105,7 +150,7 @@ def home():
 
 @app.route('/logout') #enables log out
 def logout():
-    session.pop('username', None)
+    session.pop('username', None) #removes session
     return redirect(url_for('home'))
 
 if __name__ == "__main__":
