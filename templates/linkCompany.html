@@ -1,13 +1,15 @@
 {% extends 'layout.html' %}
 {% block content %}
 <h1>Welcome {{ value }}!</h1>
-<p>your account indicated a lack of a link between your employee account and a company, doing so will allow you to access the company and begin working!</p>
+<p>your account indicated a lack of a link between your employee account and a canteen, doing so will allow you to access the canteen and begin working!</p>
 <form action="/linkCompany.html" method="post" class="box">
   <div class="input__wrapper">
-    <input type="number" name="compNumber" id="compNumber" placeholder="Enter the 6 digit secret company number here" class="input__field" required/>
+    <input type="number" name="compNumber" id="compNumber" placeholder="Enter the 6 digit secret canteen number here" class="input__field" required/>
   </div>
   <div class="input__wrapper">
     <input type="submit" class="btn" value="Submit Link" />
   </div>
 </form>
+<h2>you can also create a canteen here if you wish to start one.</h2>
+<a href="{{ url_for('createCompany') }}" >Create Company</a>
 {% endblock %}

@@ -1,11 +1,14 @@
 from flask_sqlalchemy import SQLAlchemy
+import random
 
 db = SQLAlchemy()
 
 class Company(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
-    industry = db.Column(db.String(50), nullable=False)
+    description = db.Column(db.String(150), nullable=False)
+    ownerID = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    uniqueID = db.Column(db.Integer, unique=True)
 
     def __repr__(self):
         return f'<Company {self.name}>'
@@ -26,7 +29,10 @@ class FoodItem(db.Model):
     name = db.Column(db.String(80), unique=False, nullable=False)
     foodType = db.Column(db.String(40), unique=False, nullable=False)
     description = db.Column(db.String(150), unique=False, nullable=False)
+    foodImage = db.Column(db.String(200),unique=False, nullable=True)
+    price = db.Column(db.Integer, nullable=True)
     companyUnder = db.Column(db.Integer, db.ForeignKey('company.id'), nullable=True)
+    
 
     def __repr__(self):
         return f'<User {self.name}>'

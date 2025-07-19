@@ -3,22 +3,22 @@
    <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-	<link rel="stylesheet" type="text/css" href="static/css/style.css">
+	    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='/css/style.css') }}">
         <title>Plumpton Canteen</title>
-        <link rel="manifest" href="static/manifest.json" />
-        <link rel="icon" type="image/x-icon" href="static/images/favicon.png" />
+        <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}" />
+        <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='/images/favicon.png') }}" />
         <meta name="theme-color" content="#14E6DD" />
    </head>
    <body>  
     <main>
         <nav>
-            <img src="static\icons\icon-640x640.png" alt="website logo" id="IconImage" />
+            <img src="{{ url_for('static', filename='/icons/icon-640x640.png') }}" alt="website logo" id="IconImage" />
             <h1>Canteen Management</h1>
             <ul class="topnav">
-                <li><a href="?url=/">Home</a></li>
-                <li><a href="?url=/signup.html">Signup</a></li>
+                <li><a href="{{ url_for('systemPage') }}">Home</a></li>
+                <li><a href="{{ url_for('signup') }}">Signup</a></li>
                 {% if state %}
-                    <li><a href="?url=/success.html">System</a></li>
+                    <!--  <li><a href="?url=/ManageCompany.html">Settings</a></li> <-->
                     <li><a href="{{ url_for('logout') }}">Logout</a></li>
                 {% endif %}
             </ul>
@@ -26,9 +26,8 @@
         <div class="disclaimer">
             <em>the canteen app requires an account, this is so that any orders can be identified, and any restrictions on food such as allergy requirements are met!</em>
         </div>
-    {% block content %}{% endblock %}
-    <script src="static/js/serviceWorker.js"></script>
-    <script src="static/js/app.js"></script>
-    <script src="https//getfreebootstrap.ru/bootstrap.js"></script>    
+    {% block content %}{% endblock %}   
+    <script src="{{ url_for('static', filename='js/serviceWorker.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

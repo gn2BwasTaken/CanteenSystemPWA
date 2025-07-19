@@ -1,0 +1,13 @@
+{% extends 'layout.html' %}
+{% block content %}
+<h1>Welcome {{ value }}!</h1>
+<p>creating a canteen allows for you to add food, etc.</p>
+<form action="/createCompany.html" method="post" class="box">
+  <div class="input__wrapper">
+    <input type="text" name="nameOfCompany" id="nameOfCompany" placeholder="enter name of company here" class="input__field" required/>
+  </div>
+  <div class="input__wrapper">
+    <input type="submit" class="btn" value="Submit Link" />
+  </div>
+</form>
+{% endblock %}

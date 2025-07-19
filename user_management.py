@@ -40,7 +40,7 @@ def retrieveUsers(username, password):
             return True
 
 
-def insertFeedback(feedback):
+def insertFood(feedback):
     con = sql.connect("database_files/database.db")
     cur = con.cursor()
     cur.execute(f"INSERT INTO feedback (feedback) VALUES ('{feedback}')")
@@ -48,14 +48,18 @@ def insertFeedback(feedback):
     con.close()
 
 
-def listFeedback():
-    con = sql.connect("database_files/database.db")
+def listFood(companyId):
+    con = sql.connect("instance/database.db")
     cur = con.cursor()
-    data = cur.execute("SELECT * FROM feedback").fetchall()
+    data = cur.execute(f"SELECT * FROM food_item WHERE companyUnder ={companyId}").fetchall()
     con.close()
-    f = open("templates/partials/success_feedback.html", "w")
+    f = open("templates/partials/all_food_items.html", "w")
     for row in data:
-        f.write("<p>\n")
-        f.write(f"{row[1]}\n")
-        f.write("</p>\n")
+        f.write(f"<div class={"foodItemBox"}>\n")
+        f.write(f"<img class={"foodImg"} src={row[4]}>\n")
+        f.write(f"<p class={"foodName"}>{row[1]}</p>\n")
+        f.write(f"<p class={"foodType"}>{row[2]}</p>\n")
+        f.write(f"<p class={"foodDesc"}>{row[3]}</p>\n")
+        f.write(f"<button class={"foodButton"}>View More</button>\n")
+        f.write("</div>\n")
     f.close()

@@ -3,13 +3,14 @@ from logging.config import dictConfig
 from flask import Flask, session, request, redirect, url_for
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, User
+from models import db, User, Company, FoodItem
 from flask_session import Session
+#from sqlalchemy.orm import sessionmaker
+#from sqlalchemy import create_engine
 from flask_sqlalchemy import SQLAlchemy
 from flask import render_template
 
 import user_management as dbHandler
-
 dictConfig({
     'version': 1,
     'formatters': {'default': {
@@ -31,6 +32,11 @@ dictConfig({
 # app.logger.critical("message")
 
 app = Flask(__name__)
+
+
+#engine = create_engine('sqlite:///database.db')
+#Session = sessionmaker(bind=engine)
+#session = Session()
 
 app.config['SECRET_KEY'] = b'2552f50a3f12626fcce85e0a09413e1b0a6ca6c69e64b1f7'
 app.config['SESSION_TYPE'] = 'filesystem'
@@ -57,6 +63,7 @@ def bypass_login_if_in_session(f): # this bypasses the need to log in again if t
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'username' in session:
+            #app.logger.info('in company: %s',  session['isInCompany'])
             app.logger.info('in company: %s',  session['isInCompany'])
             if session['isInCompany'] == 'No':
                 return redirect(url_for('linkCompany'))
@@ -74,12 +81,14 @@ def systemPage():
     if request.method == "POST":
         if 'username' in session: 
             feedback = request.form["feedback"]
-            dbHandler.insertFeedback(feedback)
-            dbHandler.listFeedback()
+            dbHandler.insertFood(feedback)
+            user1 = User.query.filter_by(username=session['username']).first()
+            dbHandler.listFood(user1.companyUnder)
             print('username')
             return render_template("/home.html", state=True, value="Back")
     else:
-        dbHandler.listFeedback()
+        user1 = User.query.filter_by(username=session['username']).first()
+        dbHandler.listFood(user1.companyUnder)
         return render_template("/home.html", state=True, value="Back")
     
 @app.route("/linkCompany.html", methods=["POST", "GET"])
@@ -91,10 +100,32 @@ def linkCompany():
     if request.method == "POST":
         if 'username' in session: 
             compNumber = request.form["compNumber"]
-            print(compNumber)
             return render_template("/home.html", state=True, value="Back")
     else:
         return render_template("/linkCompany.html", state=True, value="Back")
+
+@app.route("/createCompany.html", methods=["POST", "GET"]) 
+@login_required
+def createCompany():
+    if request.method == "GET" and request.args.get("url"):
+        url = request.args.get("url", "")
+        return redirect(url, code=302)
+    if request.method == "POST":
+        if 'username' in session: 
+            app.logger.info(session['username'])
+            user = User.query.filter_by(username=session['username']).first()
+            app.logger.info(user.id)
+            nameOfCompany = request.form["nameOfCompany"]
+            new_company = Company(name=nameOfCompany, description="add a description", ownerID=user.id)
+            db.session.add(new_company)
+            #doing user shit now
+            user1 = db.session.query(User).filter_by(id=user.id).first()
+            user1.companyUnder = new_company.id
+            db.session.commit()
+            session['isInCompany'] = 'Yes'
+            return render_template("/home.html", state=True, value="Back")
+    else:
+        return render_template("/createCompany.html", state=True, value="Back")
 
 
 @app.route("/signup.html", methods=["POST", "GET", "PUT", "PATCH", "DELETE"])
@@ -147,6 +178,14 @@ def home():
 
     else:
         return render_template("/index.html")
+
+@app.route('/items/<item_id>')
+def view_item(item_id):
+    item1 = db.session.query(FoodItem).filter_by(id=item_id).first()
+    if item1:
+        return render_template("/item_viewer.html", itemName=item1.name, itemDesc=item1.description)
+    else:
+        return "item not found"
 
 @app.route('/logout') #enables log out
 def logout():
