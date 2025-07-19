@@ -32,7 +32,15 @@ class FoodItem(db.Model):
     foodImage = db.Column(db.String(200),unique=False, nullable=True)
     price = db.Column(db.Integer, nullable=True)
     companyUnder = db.Column(db.Integer, db.ForeignKey('company.id'), nullable=True)
-    
 
     def __repr__(self):
-        return f'<User {self.name}>'
+        return f'<FoodItem {self.name}>'
+
+class UserCurrentCart(db.Model):
+    cartId = db.Column(db.Integer, primary_key=True)
+    foodId = db.Column(db.Integer, db.ForeignKey('food_item.id'), nullable=True)
+    userId = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    foodItemInstructions = db.Column(db.String(150), unique=False, nullable=True)
+    
+    def __repr__(self):
+        return f'<CurrentCart {self.cartId}>'

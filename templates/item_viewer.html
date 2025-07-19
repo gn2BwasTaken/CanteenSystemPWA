@@ -1,5 +1,14 @@
 {% extends 'layout.html' %}
 {% block content %}
-<h1>About {{itemName}}</h1>
-<p>{{itemDesc}}</p>
+<div class="itemViewerParent">
+    <div class="leftView">
+        <h2>{{itemName}}</h2>
+        <img class="foodImg" src={{itemImg}}>
+        <a class="foodButton" href="{{ url_for('addToCart', food_id=itemId) }}">Add 1 to Cart</a>
+    </div>
+    <div class="rightView">
+        <p>{{itemDesc}}</p>
+    </div>
+</div>
+<a href="{{ url_for('systemPage') }}" class="link1" >←</a>
 {% endblock %}

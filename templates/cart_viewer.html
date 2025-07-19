@@ -1,0 +1,8 @@
+{% extends 'layout.html' %}
+{% block content %}
+<h1>Welcome {{ value }}!</h1>
+<h2>All Food Items</h2>
+<div class="cartViewer">
+  {% include "partials/all_food_items.html" %}
+</div>
+{% endblock %}

@@ -13,13 +13,14 @@
     <main>
         <nav>
             <img src="{{ url_for('static', filename='/icons/icon-640x640.png') }}" alt="website logo" id="IconImage" />
-            <h1>Canteen Management</h1>
+            <h1 class="topThing1" >Canteen Management</h1>
             <ul class="topnav">
                 <li><a href="{{ url_for('systemPage') }}">Home</a></li>
-                <li><a href="{{ url_for('signup') }}">Signup</a></li>
                 {% if state %}
                     <!--  <li><a href="?url=/ManageCompany.html">Settings</a></li> <-->
                     <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('signup') }}">Signup</a></li>
                 {% endif %}
             </ul>
         </nav>

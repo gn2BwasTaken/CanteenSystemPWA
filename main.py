@@ -183,7 +183,7 @@ def home():
 def view_item(item_id):
     item1 = db.session.query(FoodItem).filter_by(id=item_id).first()
     if item1:
-        return render_template("/item_viewer.html", itemName=item1.name, itemDesc=item1.description)
+        return render_template("/item_viewer.html", itemName=item1.name, itemDesc=item1.description, itemImg=item1.foodImage, state=True, itemId=item1.id)
     else:
         return "item not found"
 
@@ -191,6 +191,15 @@ def view_item(item_id):
 def logout():
     session.pop('username', None) #removes session
     return redirect(url_for('home'))
+
+@app.route('/addToCart/<food_id>') #can add to cart
+def addToCart(food_id):
+    if 'username' in session:
+        app.logger.info(food_id)
+        user = User.query.filter_by(username=session['username']).first()
+        dbHandler.InsertIntoCart(food_id,user.id,"")
+        return redirect(url_for('home'))
+    
 
 if __name__ == "__main__":
     app.config["TEMPLATES_AUTO_RELOAD"] = True

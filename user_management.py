@@ -47,6 +47,15 @@ def insertFood(feedback):
     con.commit()
     con.close()
 
+def InsertIntoCart(foodIdToAdd, userId, additionalDesc):
+    con = sql.connect("instance/database.db")
+    cur = con.cursor()
+    cur.execute(
+        "INSERT INTO user_current_cart (foodId, userId, foodItemInstructions) VALUES (?, ?, ?)",
+        (foodIdToAdd, userId, additionalDesc)
+    )
+    con.commit()
+    con.close()
 
 def listFood(companyId):
     con = sql.connect("instance/database.db")
@@ -60,6 +69,6 @@ def listFood(companyId):
         f.write(f"<p class={"foodName"}>{row[1]}</p>\n")
         f.write(f"<p class={"foodType"}>{row[2]}</p>\n")
         f.write(f"<p class={"foodDesc"}>{row[3]}</p>\n")
-        f.write(f"<button class={"foodButton"}>View More</button>\n")
+        f.write(f'<a href="items/{row[0]}" class="foodButton">View More</a>\n')
         f.write("</div>\n")
     f.close()
