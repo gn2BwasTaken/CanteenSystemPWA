@@ -1,0 +1,27 @@
+{% extends 'layout.html' %}
+{% block content %}
+<h1>Welcome {{ value }}!</h1>
+<h2>All Food Items</h2>
+<div class="foodGridContainer">
+  <div class="cartViewer">
+  <table>
+  <tr>
+    <th>Purchase ID</th>
+    <th>Name</th>
+    <th>Custom Changes</th>
+    <th>Bought By</th>
+    <th>Cost</th>
+  </tr>
+  {% for purchase in purchases %}
+    <tr>
+      <td>{{ purchase.purchaseId }}</td>
+      <td>{{ purchase.food.name }}</td>
+      <td>{{ purchase.Instructions }}</td>
+      <td>{{ purchase.user.username }}</td>
+      <td>${{ purchase.food.price }}</td>
+      <td><a href="{{ url_for('removeFromCart', food_id=purchase.purchaseId) }}">X</a></td>
+    </tr>
+  {% endfor %}
+</table>
+</div>
+{% endblock %}

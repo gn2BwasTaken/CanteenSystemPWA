@@ -3,7 +3,7 @@ from logging.config import dictConfig
 from flask import Flask, session, request, redirect, url_for
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, User, Company, FoodItem, UserCurrentCart
+from models import db, User, Company, FoodItem, UserCurrentCart, Purchases
 from flask_session import Session
 #from sqlalchemy.orm import sessionmaker
 #from sqlalchemy import create_engine
@@ -230,6 +230,15 @@ def cartViewer():
         user = User.query.filter_by(username=session['username']).first()
         cartsAll = UserCurrentCart.query.filter_by(userId=user.id).all()
         return render_template("/cart_viewer.html", carts=cartsAll)
+
+
+@app.route("/allPurchases", methods=["POST","GET"])
+def allPurchases():
+    if 'username' in session:
+        user = User.query.filter_by(username=session['username']).first()
+        allPurchases = Purchases.query.filter_by(companyId=user.companyUnder).all()
+        app.logger.info(allPurchases)
+        return render_template("/allPurchases.html", purchases=allPurchases)
 
 if __name__ == "__main__":
     app.config["TEMPLATES_AUTO_RELOAD"] = True

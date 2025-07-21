@@ -51,9 +51,12 @@ class UserCurrentCart(db.Model):
 class Purchases(db.Model):
     purchaseId = db.Column(db.Integer, primary_key=True)
     foodId = db.Column(db.Integer, db.ForeignKey('food_item.id'), nullable=True)
+    food = db.relationship('FoodItem')
     userId = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship('User') #user link
+    companyId = db.Column(db.Integer, db.ForeignKey('company.id'), nullable=True)
     Instructions = db.Column(db.String(150), unique=False, nullable=True)
     timeOfAdding = db.Column(db.DateTime, default=datetime.utcnow)
     
     def __repr__(self):
-        return f'<CurrentCart {self.cartId}>'
+        return f'<Purchases {self.purchaseId}>'

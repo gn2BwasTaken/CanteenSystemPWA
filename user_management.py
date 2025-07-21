@@ -1,7 +1,7 @@
 import sqlite3 as sql
 import time
 import random
-from models import UserCurrentCart, Purchases
+from models import UserCurrentCart, Purchases, User
 from main import db
 
 blacklist = [
@@ -64,11 +64,14 @@ def removeFromCart(food_id):
 
 def buyCart(user_id):
     allCarts = UserCurrentCart.query.filter_by(userId=user_id)
+    user = User.query.filter_by(id=user_id).first()
+    
     for cart in allCarts:
         newPurchase = Purchases(
             foodId=cart.foodId,
             userId=cart.userId,
-            Instructions=cart.foodItemInstructions
+            Instructions=cart.foodItemInstructions,
+            companyId=user.companyUnder
         )
         db.session.add(newPurchase)
     
