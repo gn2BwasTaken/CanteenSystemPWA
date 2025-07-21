@@ -90,7 +90,10 @@ def systemPage():
         user1 = User.query.filter_by(username=session['username']).first()
         count = UserCurrentCart.query.filter_by(userId=user1.id).count()
         dbHandler.listFood(user1.companyUnder)
-        return render_template("/home.html", state=True, value="Back", cartCount=count)
+        isManage = False
+        if user1.customerType == "Employee":
+            isManage = True
+        return render_template("/home.html", state=True, value="Back", cartCount=count, isManaging=isManage)
     
 @app.route("/linkCompany.html", methods=["POST", "GET"])
 @login_required
@@ -100,10 +103,20 @@ def linkCompany():
         return redirect(url, code=302)
     if request.method == "POST":
         if 'username' in session: 
-            compNumber = request.form["compNumber"]
-            return render_template("/home.html", state=True, value="Back")
+            compNumber = int(request.form["compNumber"])
+            comp = Company.query.filter_by(uniqueID=compNumber).first()
+            if comp:
+                app.logger.info("your company number is: " + str(compNumber))
+                db.session.query(User).filter_by(username=session['username']).update({'companyUnder': comp.id})
+                db.session.commit()
+                if comp.ownerID == None:
+                    app.logger.info("will change now! make sure to do it!")
+                session['isInCompany'] = 'Yes'
+                return render_template("/home.html", state=True, value="Back")
+            else:
+                return render_template("/linkCompany.html", state=True, value="Back")
     else:
-        return render_template("/linkCompany.html", state=True, value="Back")
+        return render_template("/linkCompany.html", state=True, value='Back')
 
 @app.route("/createCompany.html", methods=["POST", "GET"]) 
 @login_required
@@ -124,7 +137,7 @@ def createCompany():
             user1.companyUnder = new_company.id
             db.session.commit()
             session['isInCompany'] = 'Yes'
-            return render_template("/home.html", state=True, value="Back")
+            return redirect(url_for('home'))
     else:
         return render_template("/createCompany.html", state=True, value="Back")
 
@@ -196,6 +209,14 @@ def logout():
     session.pop('username', None) #removes session
     return redirect(url_for('home'))
 
+@app.route('/manageCompany') #allows to manage company
+@login_required
+def manageCompany():
+    user = User.query.filter_by(username=session['username']).first()
+    company = Company.query.filter_by(id=user.companyUnder).first()
+    owner = User.query.filter_by(id=company.ownerID).first()
+    return render_template("manageCompany.html", companyName=company.name, companyOwner=owner.username)
+
 @app.route('/addToCart/<food_id>') #can add to cart
 def addToCart(food_id):
     if 'username' in session:
@@ -236,9 +257,14 @@ def cartViewer():
 def allPurchases():
     if 'username' in session:
         user = User.query.filter_by(username=session['username']).first()
-        allPurchases = Purchases.query.filter_by(companyId=user.companyUnder).all()
-        app.logger.info(allPurchases)
-        return render_template("/allPurchases.html", purchases=allPurchases)
+        if user.customerType == "Supplier" or user.customerType == "Supplier":
+            allPurchases = Purchases.query.filter_by(companyId=user.companyUnder).all()
+            app.logger.info(allPurchases)
+            return render_template("/allPurchases.html", purchases=allPurchases)
+        else:
+            return "your account type is not able to access this page"
+    else:
+        return "please log in"
 
 if __name__ == "__main__":
     app.config["TEMPLATES_AUTO_RELOAD"] = True

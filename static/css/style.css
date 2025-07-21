@@ -259,6 +259,10 @@ label,
   display: inline-block;
 }
 
+.purchasesGridContainer tr td {
+  height: 6rem;
+}
+
 .link1 {
   font-size: 1.5rem;
 }
@@ -341,6 +345,13 @@ label,
   text-align: left;
   border-collapse: collapse;
 }
+
+.purchasesGridContainer table {
+  width: 100%;
+  font-size: 1.5rem;
+
+}
+
 
 .cartViewer table a {
   color: red;

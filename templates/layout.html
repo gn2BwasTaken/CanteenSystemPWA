@@ -22,12 +22,12 @@
                 {% else %}
                     <li><a href="{{ url_for('signup') }}">Signup</a></li>
                 {% endif %}
+                {% if isManaging == True %}
+                    <li><a href="{{ url_for('manageCompany') }}">Manage</a></li>
+                {% endif %}
                 <li><a class="cartNumber" href="{{ url_for('cartViewer') }}"><img src="{{ url_for('static', filename='/images/shopping.svg') }}"> {{cartCount}}</a></li>
             </ul>
         </nav>
-        <div class="disclaimer">
-            <em>the canteen app requires an account, this is so that any orders can be identified, and any restrictions on food such as allergy requirements are met!</em>
-        </div>
     {% block content %}{% endblock %}   
     <script src="{{ url_for('static', filename='js/serviceWorker.js') }}"></script>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
