@@ -3,7 +3,7 @@ from logging.config import dictConfig
 from flask import Flask, session, request, redirect, url_for
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, User, Company, FoodItem
+from models import db, User, Company, FoodItem, UserCurrentCart
 from flask_session import Session
 #from sqlalchemy.orm import sessionmaker
 #from sqlalchemy import create_engine
@@ -84,12 +84,13 @@ def systemPage():
             dbHandler.insertFood(feedback)
             user1 = User.query.filter_by(username=session['username']).first()
             dbHandler.listFood(user1.companyUnder)
-            print('username')
-            return render_template("/home.html", state=True, value="Back")
+            count = UserCurrentCart.query.filter_by(userId=user1.id).count()
+            return render_template("/home.html", state=True, value="Back", cartCount=count)
     else:
         user1 = User.query.filter_by(username=session['username']).first()
+        count = UserCurrentCart.query.filter_by(userId=user1.id).count()
         dbHandler.listFood(user1.companyUnder)
-        return render_template("/home.html", state=True, value="Back")
+        return render_template("/home.html", state=True, value="Back", cartCount=count)
     
 @app.route("/linkCompany.html", methods=["POST", "GET"])
 @login_required
@@ -181,11 +182,14 @@ def home():
 
 @app.route('/items/<item_id>')
 def view_item(item_id):
-    item1 = db.session.query(FoodItem).filter_by(id=item_id).first()
-    if item1:
-        return render_template("/item_viewer.html", itemName=item1.name, itemDesc=item1.description, itemImg=item1.foodImage, state=True, itemId=item1.id)
-    else:
-        return "item not found"
+    if 'username' in session:
+        user = User.query.filter_by(username=session['username']).first()
+        item1 = db.session.query(FoodItem).filter_by(id=item_id).first()
+        count = UserCurrentCart.query.filter_by(userId=user.id).count()
+        if item1:
+            return render_template("/item_viewer.html", itemName=item1.name, itemDesc=item1.description, itemImg=item1.foodImage, state=True, itemId=item1.id, cartCount=count)
+        else:
+            return "item not found"
 
 @app.route('/logout') #enables log out
 def logout():
@@ -199,7 +203,33 @@ def addToCart(food_id):
         user = User.query.filter_by(username=session['username']).first()
         dbHandler.InsertIntoCart(food_id,user.id,"")
         return redirect(url_for('home'))
-    
+
+@app.route('/removeFromCart/<food_id>') #removes an item from the cart!
+def removeFromCart(food_id):
+    if 'username' in session:
+        app.logger.info(f'trying to delete: {food_id}')
+        user = User.query.filter_by(username=session['username']).first()
+        dbHandler.removeFromCart(food_id)
+        return redirect(url_for('cartViewer'))
+
+@app.route("/buyCart", methods=["POST","GET"])
+def buyCart():
+    if 'username' in session:
+        user = User.query.filter_by(username=session['username']).first()
+        cartsAll = UserCurrentCart.query.filter_by(userId=user.id).all()
+        price = 0
+        for cart in cartsAll:
+            price += cart.food.price
+        app.logger.info(price)
+        dbHandler.buyCart(user.id)
+        return redirect(url_for('home'))
+
+@app.route("/cart", methods=["POST","GET"])
+def cartViewer():
+    if 'username' in session:
+        user = User.query.filter_by(username=session['username']).first()
+        cartsAll = UserCurrentCart.query.filter_by(userId=user.id).all()
+        return render_template("/cart_viewer.html", carts=cartsAll)
 
 if __name__ == "__main__":
     app.config["TEMPLATES_AUTO_RELOAD"] = True

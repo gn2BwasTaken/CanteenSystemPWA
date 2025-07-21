@@ -1,8 +1,28 @@
 {% extends 'layout.html' %}
 {% block content %}
 <h1>Welcome {{ value }}!</h1>
-<h2>All Food Items</h2>
+<h2>Your Cart</h2>
 <div class="cartViewer">
-  {% include "partials/all_food_items.html" %}
+  <table>
+  <tr>
+    <th>ID</th>
+    <th>Name</th>
+    <th>Changes</th>
+    <th>Cost</th>
+    <th></th>
+  </tr>
+  {% set ns = namespace(total=0) %}
+  {% for cart in carts %}
+    <tr>
+      <td>{{ cart.cartId }}</td>
+      <td>{{ cart.food.name }}</td>
+      <td>{{ cart.foodItemInstructions }}</td>
+      <td>${{ cart.food.price }}</td>
+      <td><a href="{{ url_for('removeFromCart', food_id=cart.cartId) }}">X</a></td>
+      {% set ns.total = ns.total + cart.food.price %}
+    </tr>
+  {% endfor %}
+</table>
+<a href="{{ url_for('buyCart') }}" class="foodButton">Buy for ${{ ns.total }}</a>
 </div>
 {% endblock %}

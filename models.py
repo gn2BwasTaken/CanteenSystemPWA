@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 import random
 
 db = SQLAlchemy()
@@ -41,6 +42,18 @@ class UserCurrentCart(db.Model):
     foodId = db.Column(db.Integer, db.ForeignKey('food_item.id'), nullable=True)
     userId = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     foodItemInstructions = db.Column(db.String(150), unique=False, nullable=True)
+    timeOfAdding = db.Column(db.DateTime, default=datetime.utcnow)
+    food = db.relationship('FoodItem', backref='cart_items')
+    
+    def __repr__(self):
+        return f'<CurrentCart {self.cartId}>'
+
+class Purchases(db.Model):
+    purchaseId = db.Column(db.Integer, primary_key=True)
+    foodId = db.Column(db.Integer, db.ForeignKey('food_item.id'), nullable=True)
+    userId = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    Instructions = db.Column(db.String(150), unique=False, nullable=True)
+    timeOfAdding = db.Column(db.DateTime, default=datetime.utcnow)
     
     def __repr__(self):
         return f'<CurrentCart {self.cartId}>'

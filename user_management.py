@@ -1,6 +1,8 @@
 import sqlite3 as sql
 import time
 import random
+from models import UserCurrentCart, Purchases
+from main import db
 
 blacklist = [
     "=","-","'"
@@ -47,15 +49,31 @@ def insertFood(feedback):
     con.commit()
     con.close()
 
-def InsertIntoCart(foodIdToAdd, userId, additionalDesc):
-    con = sql.connect("instance/database.db")
-    cur = con.cursor()
-    cur.execute(
-        "INSERT INTO user_current_cart (foodId, userId, foodItemInstructions) VALUES (?, ?, ?)",
-        (foodIdToAdd, userId, additionalDesc)
+def InsertIntoCart(foodIdToAdd, user, additionalDesc):
+    new_cart = UserCurrentCart(
+        foodId=foodIdToAdd,
+        userId=user,
+        foodItemInstructions=additionalDesc
     )
-    con.commit()
-    con.close()
+    db.session.add(new_cart)
+    db.session.commit()
+
+def removeFromCart(food_id):
+    deletion = UserCurrentCart.query.filter_by(cartId=food_id).delete()
+    db.session.commit()
+
+def buyCart(user_id):
+    allCarts = UserCurrentCart.query.filter_by(userId=user_id)
+    for cart in allCarts:
+        newPurchase = Purchases(
+            foodId=cart.foodId,
+            userId=cart.userId,
+            Instructions=cart.foodItemInstructions
+        )
+        db.session.add(newPurchase)
+    
+    deletion = UserCurrentCart.query.filter_by(userId=user_id).delete()
+    db.session.commit()
 
 def listFood(companyId):
     con = sql.connect("instance/database.db")
