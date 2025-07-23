@@ -1,7 +1,18 @@
 {% extends 'layout.html' %}
 {% block content %}
 <p>welcome! here you can manage your company, and add food items, etc.</p>
-<h1>{{ companyName }}</h1>
-<h3>owned by: {{ companyOwner }}</h3>
-<a href="help" >Add Foods</a>
+<div class="itemViewerParent">
+    <div class="leftView">
+        <h1>{{ companyName }}</h1>
+        <h3>owned by: {{ companyOwner }}</h3>
+        <h3>you are: {{ username }}</h3>
+    </div>
+    <div id="manageCompanyView" class="rightView">
+        <h2>Options</h2>
+        <a class="linky" href="{{ url_for('addFoodItem') }}" >Add Foods</a> <br>
+        <a class="linky" href="help" >Manage Foods</a> <br> 
+        <a class="linky" href="help" >Unique Code For Entry</a> <br>
+        <a class="linky" href="{{ url_for('allPurchases') }}" >View Awaiting Purchases</a>
+    </div>
+</div>
 {% endblock %}

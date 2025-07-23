@@ -1,14 +1,31 @@
 {% extends 'layout.html' %}
 {% block content %}
+<form action="{{ url_for('addToCart', food_id=itemId) }}" method="post">
 <div class="itemViewerParent">
     <div class="leftView">
         <h2>{{itemName}}</h2>
         <img class="foodImg" src={{itemImg}}>
-        <a class="foodButton" href="{{ url_for('addToCart', food_id=itemId) }}">Add 1 to Cart</a>
+        <input type="submit" value="Add 1 to Cart" class="foodButton">
     </div>
     <div class="rightView">
         <p>{{itemDesc}}</p>
+        <br>
+        {% if options is defined %}
+            <select
+            id="typeOfFood"
+            name="typeOfFood"
+            list
+            class="input__field"
+            >
+            {% for option in options %}
+                <option value="{{ option }}" >{{ option }}</option>
+            {% endfor %}
+            </select>
+        {% else %}
+            <p>no changes available</p>
+        {% endif %}
     </div>
 </div>
-<a href="{{ url_for('systemPage') }}" class="link1" >←</a>
+</form>
+<a href="{{ url_for('systemPage') }}" id="buyButton" class="link1" >←</a>
 {% endblock %}

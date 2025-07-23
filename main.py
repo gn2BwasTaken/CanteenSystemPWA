@@ -3,12 +3,14 @@ from logging.config import dictConfig
 from flask import Flask, session, request, redirect, url_for
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from models import db, User, Company, FoodItem, UserCurrentCart, Purchases
 from flask_session import Session
 #from sqlalchemy.orm import sessionmaker
 #from sqlalchemy import create_engine
 from flask_sqlalchemy import SQLAlchemy
 from flask import render_template
+import os
 
 import user_management as dbHandler
 dictConfig({
@@ -32,6 +34,8 @@ dictConfig({
 # app.logger.critical("message")
 
 app = Flask(__name__)
+UPLOAD_FOLDER = 'static/uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
 #engine = create_engine('sqlite:///database.db')
@@ -200,7 +204,8 @@ def view_item(item_id):
         item1 = db.session.query(FoodItem).filter_by(id=item_id).first()
         count = UserCurrentCart.query.filter_by(userId=user.id).count()
         if item1:
-            return render_template("/item_viewer.html", itemName=item1.name, itemDesc=item1.description, itemImg=item1.foodImage, state=True, itemId=item1.id, cartCount=count)
+            FoodOptions = item1.foodOptions.split(",")
+            return render_template("/item_viewer.html", itemName=item1.name, itemDesc=item1.description, itemImg=item1.foodImage, state=True, itemId=item1.id, cartCount=count, options=FoodOptions)
         else:
             return "item not found"
 
@@ -215,15 +220,17 @@ def manageCompany():
     user = User.query.filter_by(username=session['username']).first()
     company = Company.query.filter_by(id=user.companyUnder).first()
     owner = User.query.filter_by(id=company.ownerID).first()
-    return render_template("manageCompany.html", companyName=company.name, companyOwner=owner.username)
+    return render_template("manageCompany.html", companyName=company.name, companyOwner=owner.username, username=user.username)
 
-@app.route('/addToCart/<food_id>') #can add to cart
+@app.route('/addToCart/<food_id>', methods=["POST"]) #can add to cart
 def addToCart(food_id):
-    if 'username' in session:
-        app.logger.info(food_id)
-        user = User.query.filter_by(username=session['username']).first()
-        dbHandler.InsertIntoCart(food_id,user.id,"")
-        return redirect(url_for('home'))
+    if request.method == "POST":
+        if 'username' in session:
+            options = ""
+            options = request.form["typeOfFood"]
+            user = User.query.filter_by(username=session['username']).first()
+            dbHandler.InsertIntoCart(food_id,user.id,options)
+            return redirect(url_for('home'))
 
 @app.route('/removeFromCart/<food_id>') #removes an item from the cart!
 def removeFromCart(food_id):
@@ -257,7 +264,7 @@ def cartViewer():
 def allPurchases():
     if 'username' in session:
         user = User.query.filter_by(username=session['username']).first()
-        if user.customerType == "Supplier" or user.customerType == "Supplier":
+        if user.customerType == "Supplier" or user.customerType == "Employee":
             allPurchases = Purchases.query.filter_by(companyId=user.companyUnder).all()
             app.logger.info(allPurchases)
             return render_template("/allPurchases.html", purchases=allPurchases)
@@ -265,6 +272,14 @@ def allPurchases():
             return "your account type is not able to access this page"
     else:
         return "please log in"
+
+@app.route('/addFoodItem', methods=["POST","GET"]) #enables food stuff
+def addFoodItem():
+    if request.method == "POST":
+        app.logger.info(request.files['image'])
+        return render_template("/addFoodItem.html")
+    else:
+        return render_template("/addFoodItem.html")
 
 if __name__ == "__main__":
     app.config["TEMPLATES_AUTO_RELOAD"] = True

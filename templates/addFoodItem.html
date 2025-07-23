@@ -1,0 +1,51 @@
+{% extends 'layout.html' %}
+{% block content %}
+<h1>Welcome {{ value }}!</h1>
+<p>creating a canteen allows for you to add food, etc.</p>
+<form action="{{ url_for('addFoodItem') }}" method="post" class="box" enctype="multipart/form-data">
+  <div class="itemViewerParent">
+      <div class="leftView">
+      <h1>Item Insert</h1>
+      <div class="imagePreview">
+        <img id="foodImage" class="foodImg" src="">
+      </div>
+      <div class="input__wrapper">
+        <input id="imageImport" name="image" type="file" class="imageInsert" accept="image/*" value="Submit File" />
+      </div>
+      <div class="input__wrapper">
+        <input type="submit" class="btn" value="Submit Link" />
+      </div>
+    </div>
+    <div class="rightView">
+      <div class="input__wrapper">
+        <input type="text" name="nameOfFood" id="nameOfFood" placeholder="food name" class="input__field" required/>
+      </div>
+      <div class="input__wrapper">
+        <select
+          id="typeOfFood"
+          name="typeOfFood"
+          list
+          class="input__field"
+        >
+        <option value="Hot Food">Hot Food</option>
+        <option value="Snack">Snack</option>
+        <option value="Salad">Salad</option>
+        <option value="Dessert">Dessert</option>
+        <option value="Pastry">Pastry</option>
+      </select>
+      </div>
+      <div class="input__wrapper">
+        <textarea class="input__field" placeholder="description of food" style="min-width: 100%; max-width: 100%; resize: none;" name="descriptionText" rows="10" required></textarea>
+      </div>
+    </div>
+  </div>
+</form>
+<script>
+  importImage = document.getElementById('imageImport')
+  previewImage = document.getElementById('foodImage')
+
+  importImage.addEventListener("change", function(){
+    previewImage.src = URL.createObjectURL(importImage.files[0]);
+  });
+</script>
+{% endblock %}

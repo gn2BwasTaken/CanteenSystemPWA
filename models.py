@@ -33,6 +33,7 @@ class FoodItem(db.Model):
     foodImage = db.Column(db.String(200),unique=False, nullable=True)
     price = db.Column(db.Integer, nullable=True)
     companyUnder = db.Column(db.Integer, db.ForeignKey('company.id'), nullable=True)
+    foodOptions = db.Column(db.String(150), unique=False, nullable=True)
 
     def __repr__(self):
         return f'<FoodItem {self.name}>'
