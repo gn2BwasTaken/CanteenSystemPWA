@@ -15,15 +15,15 @@
             <img src="{{ url_for('static', filename='/icons/icon-640x640.png') }}" alt="website logo" id="IconImage" />
             <h1 class="topThing1" >Canteen Management</h1>
             <ul class="topnav">
-                <li><a href="{{ url_for('systemPage') }}">Home</a></li>
+                <li><a href="{{ url_for('systemPage') }}"><img id="hoverIcon" src="{{ url_for('static', filename='/images/home.svg') }}" alt="Home"></a></li>
                 {% if state %}
                     <!--  <li><a href="?url=/ManageCompany.html">Settings</a></li> <-->
-                    <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                    <li><a href="{{ url_for('logout') }}"><img id="hoverIcon" src="{{ url_for('static', filename='/images/logout.svg') }}" alt="Logout"></a></li>
                 {% else %}
-                    <li><a href="{{ url_for('signup') }}">Signup</a></li>
+                    <li><a href="{{ url_for('signup') }}"><img id="hoverIcon" src="{{ url_for('static', filename='/images/signup.svg') }}" alt="Signup"></a></li>
                 {% endif %}
                 {% if isManaging == True %}
-                    <li><a href="{{ url_for('manageCompany') }}">Manage</a></li>
+                    <li><a href="{{ url_for('manageCompany') }}"><img id="hoverIcon" src="{{ url_for('static', filename='/images/settings.svg') }}" alt="Manage"></a></li>
                 {% endif %}
                 <li><a class="cartNumber" href="{{ url_for('cartViewer') }}"><img src="{{ url_for('static', filename='/images/shopping.svg') }}"> {{cartCount}}</a></li>
             </ul>

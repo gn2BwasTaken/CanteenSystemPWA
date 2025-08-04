@@ -4,7 +4,7 @@
 <div class="itemViewerParent">
     <div class="leftView">
         <h2>{{itemName}}</h2>
-        <img class="foodImg" src={{itemImg}}>
+        <img class="foodImg" src="{{ url_for('static', filename=itemImg) }}">
         <input type="submit" value="Add 1 to Cart" class="foodButton">
     </div>
     <div class="rightView">
@@ -28,4 +28,7 @@
 </div>
 </form>
 <a href="{{ url_for('systemPage') }}" id="buyButton" class="link1" >←</a>
+{% if isEmployee %}
+<a href="{{ url_for('manageFoodItem', item_id=itemId) }}" class="link1" id="modifyFood1">⚙︎</a>
+{% endif %}
 {% endblock %}

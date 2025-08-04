@@ -11,8 +11,9 @@
         <h2>Options</h2>
         <a class="linky" href="{{ url_for('addFoodItem') }}" >Add Foods</a> <br>
         <a class="linky" href="help" >Manage Foods</a> <br> 
-        <a class="linky" href="help" >Unique Code For Entry</a> <br>
-        <a class="linky" href="{{ url_for('allPurchases') }}" >View Awaiting Purchases</a>
+        <a class="linky" href="{{ url_for('viewUniqueCode') }}" >Unique Code For Entry</a> <br>
+        <a class="linky" href="{{ url_for('allPurchases') }}" >View Awaiting Purchases</a> <br>
+        <a class="linky" href="help" >Point of Sale</a> <br>
     </div>
 </div>
 {% endblock %}

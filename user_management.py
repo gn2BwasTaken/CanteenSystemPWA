@@ -87,7 +87,7 @@ def listFood(companyId):
     for row in data:
         f.write(f"<div class={"foodItemBox"}>\n")
         f.write(f"<img class={"foodImg"} src={row[4]}>\n")
-        f.write(f"<p class={"foodName"}>{row[1]}</p>\n")
+        f.write(f"<p class={"foodName"}>{row[1]}</p> <p class={"foodPrice"}>${row[5]}</p>")
         f.write(f"<p class={"foodType"}>{row[2]}</p>\n")
         f.write(f"<p class={"foodDesc"}>{row[3]}</p>\n")
         f.write(f'<a href="items/{row[0]}" class="foodButton">View More</a>\n')

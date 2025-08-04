@@ -5,12 +5,16 @@ from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from models import db, User, Company, FoodItem, UserCurrentCart, Purchases
+from emailSend import send_basic_message
 from flask_session import Session
+import random
+
 #from sqlalchemy.orm import sessionmaker
 #from sqlalchemy import create_engine
 from flask_sqlalchemy import SQLAlchemy
 from flask import render_template
 import os
+from PIL import Image
 
 import user_management as dbHandler
 dictConfig({
@@ -28,6 +32,10 @@ dictConfig({
         'handlers': ['wsgi']
     }
 })
+
+def compress_image(input_path, output_path, quality=70):
+    img = Image.open(input_path)
+    img.save(output_path, optimize=True, quality=quality)
 
 
 # Code snippet for logging a message
@@ -120,7 +128,10 @@ def linkCompany():
             else:
                 return render_template("/linkCompany.html", state=True, value="Back")
     else:
-        return render_template("/linkCompany.html", state=True, value='Back')
+        isanEmployee = False
+        if session['customerType'] == 'Employee':
+            isanEmployee = True
+        return render_template("/linkCompany.html", state=True, value='Back', IsEmployee=isanEmployee)
 
 @app.route("/createCompany.html", methods=["POST", "GET"]) 
 @login_required
@@ -134,9 +145,10 @@ def createCompany():
             user = User.query.filter_by(username=session['username']).first()
             app.logger.info(user.id)
             nameOfCompany = request.form["nameOfCompany"]
-            new_company = Company(name=nameOfCompany, description="add a description", ownerID=user.id)
+            randy1 = random.randint(100000,999999)
+            new_company = Company(name=nameOfCompany, description="add a description", ownerID=user.id, uniqueID=randy1)
             db.session.add(new_company)
-            #doing user shit now
+            #doing user stuff now
             user1 = db.session.query(User).filter_by(id=user.id).first()
             user1.companyUnder = new_company.id
             db.session.commit()
@@ -188,7 +200,7 @@ def home():
                     return redirect(url_for('linkCompany'))
                 else:
                     session['isInCompany'] = 'Yes'
-                    return render_template("/home.html", value=username, state=True)
+                    return url_for('systemPage')
             else:
                 return redirect(url_for('home'))
         except:
@@ -204,10 +216,36 @@ def view_item(item_id):
         item1 = db.session.query(FoodItem).filter_by(id=item_id).first()
         count = UserCurrentCart.query.filter_by(userId=user.id).count()
         if item1:
+            if user.customerType == "Employee":
+                employeeStats = True
+            else:
+                employeeStats = False
             FoodOptions = item1.foodOptions.split(",")
-            return render_template("/item_viewer.html", itemName=item1.name, itemDesc=item1.description, itemImg=item1.foodImage, state=True, itemId=item1.id, cartCount=count, options=FoodOptions)
+            return render_template("/item_viewer.html", itemName=item1.name, itemDesc=item1.description, itemImg=(item1.foodImage).replace("static/",""), state=True, itemId=item1.id, cartCount=count, options=FoodOptions, isEmployee=employeeStats)
         else:
             return "item not found"
+
+@app.route('/manageFoodItem/<item_id>')
+def manageFoodItem(item_id):
+    if request.method == "POST":
+        if 'username' in session:
+            #insert the shit here
+            return redirect(url_for('home'))
+    else:
+        food = FoodItem.query.filter_by(id=item_id).first()
+        return render_template("/manageFoodItem.html", itemId=item_id, foodName=food.name, foodType=food.foodType, foodDescription=food.description, foodOptions=food.foodOptions, foodPrice=food.price, foodImage=(food.foodImage).replace("static/",""))
+
+@app.route('/manageFoodItemActual', methods=["POST"])
+def manageItem():
+    return 0
+
+@app.route('/notifyAboutPurchase/<purchase_id>')
+def notifyAboutPurchase(purchase_id):
+    purchase1 = Purchases.query.filter_by(purchaseId=purchase_id).first()
+    food1 = FoodItem.query.filter_by(id=purchase1.foodId).first()
+    userMail = "shadowgod266@outlook.com"
+    send_basic_message(userMail,"Your purchase is available for pick up!",f'The food item: {food1.name} is now available for pick up! Please come to the counter.')
+    return url_for('systemPage')
 
 @app.route('/logout') #enables log out
 def logout():
@@ -220,7 +258,7 @@ def manageCompany():
     user = User.query.filter_by(username=session['username']).first()
     company = Company.query.filter_by(id=user.companyUnder).first()
     owner = User.query.filter_by(id=company.ownerID).first()
-    return render_template("manageCompany.html", companyName=company.name, companyOwner=owner.username, username=user.username)
+    return render_template("manageCompany.html", companyName=company.name, companyOwner=owner.username, username=user.username, state=True)
 
 @app.route('/addToCart/<food_id>', methods=["POST"]) #can add to cart
 def addToCart(food_id):
@@ -260,7 +298,7 @@ def cartViewer():
         return render_template("/cart_viewer.html", carts=cartsAll)
 
 
-@app.route("/allPurchases", methods=["POST","GET"])
+@app.route("/allPurchases")
 def allPurchases():
     if 'username' in session:
         user = User.query.filter_by(username=session['username']).first()
@@ -275,11 +313,44 @@ def allPurchases():
 
 @app.route('/addFoodItem', methods=["POST","GET"]) #enables food stuff
 def addFoodItem():
-    if request.method == "POST":
-        app.logger.info(request.files['image'])
-        return render_template("/addFoodItem.html")
+    if request.method == "POST" and 'username' in session:
+        user = User.query.filter_by(username=session['username']).first()
+        image = request.files['image']
+        filename = secure_filename(image.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
+        image.save(filepath)
+
+        compressed_path = os.path.join(app.config['UPLOAD_FOLDER'], f"compressed_{filename}")
+        img = Image.open(filepath)
+        img.thumbnail((700,700))
+        img.save(compressed_path.replace('.jpg','.webp'), optimize=True, quality=45, format='WEBP')
+        new_item = FoodItem(
+            name=request.form['nameOfFood'],
+            foodType=request.form['typeOfFood'],
+            description=request.form['descriptionText'],
+            foodImage=compressed_path.replace(".jpg", ".webp"),
+            price=request.form['foodPrice'],
+            companyUnder=user.companyUnder,
+            foodOptions=request.form['foodOptions']
+        )
+        db.session.add(new_item)
+        db.session.commit()
+        return render_template("/addFoodItem.html",state=True)
     else:
-        return render_template("/addFoodItem.html")
+        return render_template("/addFoodItem.html",state=True)
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template("404.html")
+
+@app.route('/viewUniqueCode')
+@login_required
+def viewUniqueCode():
+    user = User.query.filter_by(username=session['username']).first()
+    company = Company.query.filter_by(id=user.companyUnder).first()
+    app.logger.info(user.companyUnder)
+    return render_template("viewUniqueCode.html", companyCode=company.uniqueID)
 
 if __name__ == "__main__":
     app.config["TEMPLATES_AUTO_RELOAD"] = True

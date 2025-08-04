@@ -1,16 +1,17 @@
 {% extends 'layout.html' %}
 {% block content %}
 <h1>Welcome {{ value }}!</h1>
-<p>creating a canteen allows for you to add food, etc.</p>
+<p>manage your food item here.</p>
 <form action="{{ url_for('addFoodItem') }}" method="post" class="box" enctype="multipart/form-data">
   <div class="itemViewerParent">
       <div class="leftView">
-      <h1>Item Insert</h1>
+      <h1>Item Configure</h1>
       <div class="imagePreview">
-        <img id="foodImage" class="foodImg" src="">
+        <img id="foodImage" class="foodImg" src="{{ url_for('static', filename=foodImage) }}">
       </div>
       <div class="input__wrapper">
         <input id="imageImport" name="image" type="file" class="imageInsert" accept="image/*" value="Submit File" />
+        <p>if a new image is not input, then it will remain the same</p>
       </div>
       <div class="input__wrapper">
         <input type="submit" class="btn" value="Submit Link" />
@@ -18,7 +19,7 @@
     </div>
     <div class="rightView">
       <div class="input__wrapper">
-        <input type="text" name="nameOfFood" id="nameOfFood" placeholder="food name" class="input__field" required/>
+        <input value="{{foodName}}" type="text" name="nameOfFood" id="nameOfFood" placeholder="food name" class="input__field" required/>
       </div>
       <div class="input__wrapper">
         <select
@@ -36,25 +37,32 @@
       </select>
       </div>
       <div class="input__wrapper">
-        <textarea class="input__field" placeholder="description of food" style="min-width: 100%; max-width: 100%; resize: none;" name="descriptionText" rows="10" required></textarea>
+        <textarea class="input__field" placeholder="description of food" style="min-width: 100%; max-width: 100%; resize: none;" name="descriptionText" rows="10" required>{{foodDescription}}</textarea>
       </div>
       <div class="input__wrapper">
-        <input type="text" name="foodOptions" id="foodOptions" placeholder="not required: type1,type2,type3" class="input__field"/>
+        <input value="{{foodOptions}}" type="text" name="foodOptions" id="foodOptions" placeholder="not required: type1,type2,type3" class="input__field"/>
       </div>
-      <p>format using commas e.g: type1,type2,type3 ^</p>
+      <p>format using commas e.g: type1,type2,type3</p>
       <div class="input__wrapper">
-        <input type="number" name="foodPrice" id="foodPrice" step="0.01" class="input__field"/>
+        <input value="{{foodPrice}}" type="number" name="foodPrice" id="foodPrice" step="0.01" class="input__field"/>
       </div>
-      <p>price of food ^</p>
+      <p>price of food</p>
     </div>
   </div>
 </form>
 <script>
   importImage = document.getElementById('imageImport')
   previewImage = document.getElementById('foodImage')
+  select1 = document.getElementById('typeOfFood')
+
+  select1.value = "{{foodType}}"
 
   importImage.addEventListener("change", function(){
     previewImage.src = URL.createObjectURL(importImage.files[0]);
   });
+
+  importImage.src = "{{ foodImage }}";
+
+
 </script>
 {% endblock %}

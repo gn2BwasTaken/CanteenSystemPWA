@@ -31,7 +31,7 @@ class FoodItem(db.Model):
     foodType = db.Column(db.String(40), unique=False, nullable=False)
     description = db.Column(db.String(150), unique=False, nullable=False)
     foodImage = db.Column(db.String(200),unique=False, nullable=True)
-    price = db.Column(db.Integer, nullable=True)
+    price = db.Column(db.Numeric(6,2), nullable=True)
     companyUnder = db.Column(db.Integer, db.ForeignKey('company.id'), nullable=True)
     foodOptions = db.Column(db.String(150), unique=False, nullable=True)
 
