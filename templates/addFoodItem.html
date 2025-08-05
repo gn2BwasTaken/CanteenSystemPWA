@@ -10,7 +10,7 @@
         <img id="foodImage" class="foodImg" src="">
       </div>
       <div class="input__wrapper">
-        <input id="imageImport" name="image" type="file" class="imageInsert" accept="image/*" value="Submit File" />
+        <input id="imageImport" name="image" type="file" class="imageInsert" accept=".jpg" value="Submit File" required/>
       </div>
       <div class="input__wrapper">
         <input type="submit" class="btn" value="Submit Link" />
@@ -26,6 +26,7 @@
           name="typeOfFood"
           list
           class="input__field"
+          required
         >
         <option value="Hot Food">Hot Food</option>
         <option value="Snack">Snack</option>
@@ -43,7 +44,7 @@
       </div>
       <p>format using commas e.g: type1,type2,type3 ^</p>
       <div class="input__wrapper">
-        <input type="number" name="foodPrice" id="foodPrice" step="0.01" class="input__field"/>
+        <input type="number" name="foodPrice" id="foodPrice" step="0.01" class="input__field" required/>
       </div>
       <p>price of food ^</p>
     </div>

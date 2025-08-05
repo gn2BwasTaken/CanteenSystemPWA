@@ -227,17 +227,42 @@ def view_item(item_id):
 
 @app.route('/manageFoodItem/<item_id>')
 def manageFoodItem(item_id):
-    if request.method == "POST":
-        if 'username' in session:
-            #insert the shit here
-            return redirect(url_for('home'))
-    else:
-        food = FoodItem.query.filter_by(id=item_id).first()
-        return render_template("/manageFoodItem.html", itemId=item_id, foodName=food.name, foodType=food.foodType, foodDescription=food.description, foodOptions=food.foodOptions, foodPrice=food.price, foodImage=(food.foodImage).replace("static/",""))
+    food = FoodItem.query.filter_by(id=item_id).first()
+    return render_template("/manageFoodItem.html", food_id=food.id, foodName=food.name, foodType=food.foodType, foodDescription=food.description, foodOptions=food.foodOptions, foodPrice=food.price, foodImage=(food.foodImage).replace("static/",""))
 
 @app.route('/manageFoodItemActual', methods=["POST"])
 def manageItem():
-    return 0
+    if request.method == "POST":
+        image = request.files['image']
+        compressed_path = "null"
+        if image:
+            app.logger.info("yes we got an image")
+            #we should remove the old image, but idk
+            filename = secure_filename(image.filename)
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
+            image.save(filepath)
+
+            compressed_path = os.path.join(app.config['UPLOAD_FOLDER'], f"compressed_{filename}")
+            img = Image.open(filepath)
+            img.thumbnail((700,700))
+            img.save(compressed_path.replace('.jpg','.webp'), optimize=True, quality=45, format='WEBP')
+
+        newName, newImage, foodType, foodDescription, foodOptions, Price = request.form['nameOfFood'],compressed_path.replace(".jpg", ".webp"),request.form['typeOfFood'],request.form['descriptionText'],request.form['foodOptions'],request.form['foodPrice']
+        app.logger.info(request.form['foodId'])
+        foodItemToModify = db.session.query(FoodItem).filter_by(id=request.form['foodId']).first()
+        if foodItemToModify:
+            app.logger.info(foodItemToModify)
+            if compressed_path != "null":
+                foodItemToModify.foodImage = compressed_path.replace(".jpg",".webp")
+            foodItemToModify.name = newName
+            foodItemToModify.foodType = foodType
+            foodItemToModify.description = foodDescription
+            foodItemToModify.foodOptions = foodOptions
+            foodItemToModify.price = Price
+            db.session.commit()
+        return redirect(url_for('home')) # should later redirect to item page
+    return None
 
 @app.route('/notifyAboutPurchase/<purchase_id>')
 def notifyAboutPurchase(purchase_id):
@@ -245,7 +270,7 @@ def notifyAboutPurchase(purchase_id):
     food1 = FoodItem.query.filter_by(id=purchase1.foodId).first()
     userMail = "shadowgod266@outlook.com"
     send_basic_message(userMail,"Your purchase is available for pick up!",f'The food item: {food1.name} is now available for pick up! Please come to the counter.')
-    return url_for('systemPage')
+    return redirect(url_for('systemPage'))
 
 @app.route('/logout') #enables log out
 def logout():
