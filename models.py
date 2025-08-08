@@ -17,6 +17,7 @@ class Company(db.Model):
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(100))
     password = db.Column(db.String(120), nullable=False)
     dateOfBirth = db.Column(db.String(40), unique=False, nullable=False)
     customerType = db.Column(db.String(20), unique=False, nullable=False)

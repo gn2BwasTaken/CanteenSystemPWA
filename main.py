@@ -33,6 +33,13 @@ dictConfig({
     }
 })
 
+badTags = ["<",">","/","="]
+def sanitise(value):
+    newString = value
+    for x in badTags:
+        newString = newString.replace(x,"")
+    return newString
+
 def compress_image(input_path, output_path, quality=70):
     img = Image.open(input_path)
     img.save(output_path, optimize=True, quality=quality)
@@ -168,10 +175,11 @@ def signup():
         if len(request.form["password"]) < 12:
             return redirect(url_for('home'))
         username = request.form["username"]
+        email = request.form["email"]
         password = generate_password_hash(request.form['password'])
         dateOfBirth = request.form["dob"]
         typeOfAccount = request.form["typeOfAccount"]
-        new_user = User(username=username, password=password, dateOfBirth=dateOfBirth, customerType=typeOfAccount)
+        new_user = User(username=username, email=email, password=password, dateOfBirth=dateOfBirth, customerType=typeOfAccount)
         db.session.add(new_user)
         db.session.commit()
         return redirect(url_for('home'))
@@ -200,7 +208,7 @@ def home():
                     return redirect(url_for('linkCompany'))
                 else:
                     session['isInCompany'] = 'Yes'
-                    return url_for('systemPage')
+                    return redirect(url_for('systemPage'))
             else:
                 return redirect(url_for('home'))
         except:
@@ -227,8 +235,13 @@ def view_item(item_id):
 
 @app.route('/manageFoodItem/<item_id>')
 def manageFoodItem(item_id):
-    food = FoodItem.query.filter_by(id=item_id).first()
-    return render_template("/manageFoodItem.html", food_id=food.id, foodName=food.name, foodType=food.foodType, foodDescription=food.description, foodOptions=food.foodOptions, foodPrice=food.price, foodImage=(food.foodImage).replace("static/",""))
+    try:
+        newid = sanitise(item_id)
+        app.logger.info(newid)
+        food = FoodItem.query.filter_by(id=int(newid)).first()
+        return render_template("/manageFoodItem.html", food_id=food.id, foodName=food.name, foodType=food.foodType, foodDescription=food.description, foodOptions=food.foodOptions, foodPrice=food.price, foodImage=(food.foodImage).replace("static/",""))
+    except:
+        return "this is an invalid input"
 
 @app.route('/manageFoodItemActual', methods=["POST"])
 def manageItem():
@@ -339,29 +352,32 @@ def allPurchases():
 @app.route('/addFoodItem', methods=["POST","GET"]) #enables food stuff
 def addFoodItem():
     if request.method == "POST" and 'username' in session:
-        user = User.query.filter_by(username=session['username']).first()
-        image = request.files['image']
-        filename = secure_filename(image.filename)
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        try:
+            user = User.query.filter_by(username=session['username']).first()
+            image = request.files['image']
+            filename = secure_filename(image.filename)
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
-        image.save(filepath)
+            image.save(filepath)
 
-        compressed_path = os.path.join(app.config['UPLOAD_FOLDER'], f"compressed_{filename}")
-        img = Image.open(filepath)
-        img.thumbnail((700,700))
-        img.save(compressed_path.replace('.jpg','.webp'), optimize=True, quality=45, format='WEBP')
-        new_item = FoodItem(
-            name=request.form['nameOfFood'],
-            foodType=request.form['typeOfFood'],
-            description=request.form['descriptionText'],
-            foodImage=compressed_path.replace(".jpg", ".webp"),
-            price=request.form['foodPrice'],
-            companyUnder=user.companyUnder,
-            foodOptions=request.form['foodOptions']
-        )
-        db.session.add(new_item)
-        db.session.commit()
-        return render_template("/addFoodItem.html",state=True)
+            compressed_path = os.path.join(app.config['UPLOAD_FOLDER'], f"compressed_{filename}")
+            img = Image.open(filepath)
+            img.thumbnail((700,700))
+            img.save(compressed_path.replace('.jpg','.webp'), optimize=True, quality=45, format='WEBP')
+            new_item = FoodItem(
+                name=sanitise(request.form['nameOfFood']),
+                foodType=sanitise(request.form['typeOfFood']),
+                description=sanitise(request.form['descriptionText']),
+                foodImage=compressed_path.replace(".jpg", ".webp"),
+                price=float(sanitise(request.form['foodPrice'])),
+                companyUnder=user.companyUnder,
+                foodOptions=sanitise(request.form['foodOptions'])
+            )
+            db.session.add(new_item)
+            db.session.commit()
+            return render_template("/addFoodItem.html",state=True)
+        except:
+            return 'failed!'
     else:
         return render_template("/addFoodItem.html",state=True)
 

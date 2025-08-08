@@ -14,6 +14,15 @@
       class="input__field"
     />
   </div>
+  <div class="input_wrapper">
+    <input
+      id="email"
+      type="text"
+      name="email"
+      placeholder="example@example.com"
+      class="input__field"
+    />
+  </div>
   <div class="input__wrapper">
     <input
       id="Password"
@@ -32,7 +41,6 @@
     />
      <option value="Customer">Customer</option>
      <option value="Employee">Employee</option>
-     <option value="Supplier">Supplier</option>
   </select>
   </div>
   <div class="input__wrapper">
@@ -58,6 +66,10 @@
       <img src="static\images\bad.svg" />
       uncommon password
     </p>
+    <p id="EmailRequirement">
+      <img src="static\images\bad.svg" />
+      email must meet schema
+    </p>
   </div>
   <div class="input__wrapper">
     <button id="submitButton" type="submit" class="btn">Submit</button>
@@ -68,7 +80,12 @@
   const specialChars = ["@", "#", "(", ")", "$"];
   const commonPasswords = ["password", "01234567890", "qwertyuiop"];
 
+  function emailIsValid (email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) // validates email
+  }
+
   const usernameInput = document.getElementById("Username");
+  const emailInput = document.getElementById("email");
   const passwordInput = document.getElementById("Password");
   const DoBInput = document.getElementById("DateOfBirth");
   let ConfirmationText = document.getElementById("ConfirmationText");
@@ -78,8 +95,25 @@
   let NotBasic = false;
   let MinimumText = false;
   let SpecialChars = false;
+  let ProperEmail = false;
 
   const ValidationWarning = document.querySelector(".validation-warning");
+
+  emailInput.addEventListener("input", function () {
+    if (emailIsValid(emailInput.value)) {
+      ProperEmail = true;
+      CurrentImg = document.getElementById("EmailRequirement").querySelector("img");
+      CurrentImg.src = "static/images/good.svg";
+      CurrentImg.style.transform =
+        "translate(0px, 2px) rotate(0deg) scale(1.5,1.5)";
+    } else {
+      ProperEmail = false;
+      CurrentImg = document.getElementById("EmailRequirement").querySelector("img");
+      CurrentImg.src = "static/images/bad.svg";
+      CurrentImg.style.transform =
+        "translate(0px, 2px) rotate(90deg) scale(1,1)";
+    }
+  })
 
   passwordInput.addEventListener("input", function () {
     if (passwordInput.value.length > 12) {
@@ -132,13 +166,15 @@
     }
     let submitButton = document.getElementById("submitButton");
     //console.log(NotBasic, MinimumText, SpecialChars);
-    if (NotBasic && MinimumText && SpecialChars) {
+    if (NotBasic && MinimumText && SpecialChars && ProperEmail) {
       console.log("all three!");
-      //submitButton.disabled = false; //here is where it errors
+      //submitButton.disabled = false;
+      submitButton.style.display = "inline"
       submitButton.style.backgroundColor = "#bbb";
       ConfirmationText.innerHTML = "You're good to go!";
     } else {
       console.log("not all three!");
+      submitButton.style.display = "none"
       //submitButton.disabled = true;
       submitButton.style.backgroundColor = "#c76b73";
       ConfirmationText.innerHTML = "Still has some issues.";
